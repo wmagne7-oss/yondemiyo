@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>よんでみよう！</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --or:#FF8C42;--or2:#FFF0E4;
+  --bl:#3BA6CF;--bl2:#E4F4FC;
+  --gr:#4CAF7D;--gr2:#E4F8EC;
+  --re:#E55353;
+  --pu:#8B6CF7;--pu2:#F0EDFF;
+  --ye:#F5C518;
+  --bg:#FFF9F4;--card:#fff;
+  --tx:#2C2C2C;--mu:#AAA;
+  --rad:22px;
+}
+html,body{min-height:100%;font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--tx)}
+body{display:flex;justify-content:center;padding:20px 16px 40px}
+.wrap{width:100%;max-width:480px}
+
+.screen{display:none;animation:fu .28s ease both}
+.screen.active{display:block}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.card{background:var(--card);border-radius:var(--rad);padding:30px 26px;box-shadow:0 4px 24px rgba(0,0,0,.08);margin-bottom:16px}
+
+/* タイトル */
+.logo{font-size:56px;text-align:center;animation:bob 2.5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.app-name{font-size:28px;font-weight:900;color:var(--or);text-align:center;letter-spacing:2px;margin:8px 0 4px}
+.app-sub{font-size:13px;color:var(--mu);text-align:center;margin-bottom:24px}
+.notice{font-size:12px;color:var(--mu);background:var(--or2);border-radius:10px;padding:9px;text-align:center;margin-bottom:20px}
+
+/* ボタン */
+.btn{display:block;width:100%;border:none;border-radius:50px;font-family:inherit;font-weight:700;font-size:18px;cursor:pointer;padding:16px;transition:transform .1s,opacity .1s;text-align:center;line-height:1}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn+.btn{margin-top:10px}
+.btn-or{background:var(--or);color:#fff}
+.btn-bl{background:var(--bl);color:#fff}
+.btn-gh{background:var(--or2);color:var(--or)}
+.btn-sm{font-size:14px;padding:11px}
+
+/* ストーリー一覧 */
+.list-head{font-size:12px;font-weight:700;color:var(--or);letter-spacing:1px;margin-bottom:14px}
+.story-item{display:flex;align-items:center;gap:12px;border:2px solid #EEE;border-radius:16px;padding:14px 16px;cursor:pointer;margin-bottom:10px;transition:all .15s;background:#fff}
+.story-item:hover{border-color:var(--or);background:var(--or2)}
+.si-icon{font-size:32px;flex-shrink:0}
+.si-info{flex:1;min-width:0}
+.si-title{font-size:16px;font-weight:700;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si-author{font-size:11px;color:var(--mu)}
+.si-tag{font-size:10px;background:var(--pu2);color:var(--pu);border-radius:6px;padding:2px 7px;font-weight:700;flex-shrink:0}
+
+/* 文章 */
+.sec-label{font-size:11px;font-weight:700;color:var(--or);letter-spacing:1px;margin-bottom:5px}
+.p-title{font-size:20px;font-weight:900;margin-bottom:2px}
+.p-author{font-size:11px;color:var(--mu);margin-bottom:14px}
+.p-box{background:var(--or2);border:2px solid #FFD4B0;border-radius:14px;padding:16px;font-size:19px;line-height:2.3;white-space:pre-line;margin-bottom:14px}
+.p-hint{font-size:13px;color:var(--mu);text-align:center;margin-bottom:20px}
+
+/* 録音 */
+.rec-text{background:#FFF5EE;border:2px solid #FFD4B0;border-radius:14px;padding:14px;font-size:17px;line-height:2.2;white-space:pre-line;max-height:190px;overflow-y:auto;margin-bottom:18px}
+.mic-wrap{text-align:center;margin-bottom:14px}
+.mic-hint{font-size:13px;color:var(--re);font-weight:700;margin-bottom:8px}
+.mic-btn{display:inline-flex;align-items:center;justify-content:center;width:90px;height:90px;border-radius:50%;background:var(--re);font-size:38px;border:none;cursor:pointer;animation:rp 1.6s ease-in-out infinite;transition:transform .1s}
+.mic-btn:active{transform:scale(.93)}
+@keyframes rp{0%{box-shadow:0 0 0 0 rgba(229,83,83,.5)}70%{box-shadow:0 0 0 20px rgba(229,83,83,0)}100%{box-shadow:0 0 0 0 rgba(229,83,83,0)}}
+.heard{background:#F2F2F2;border-radius:10px;padding:10px 12px;font-size:12px;color:#999;min-height:36px;word-break:break-all}
+
+/* 判定 */
+.big{font-size:64px;text-align:center;margin:4px 0;animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.r-head{font-size:24px;font-weight:900;text-align:center;margin-bottom:6px}
+.r-msg{font-size:14px;color:var(--mu);text-align:center;margin-bottom:16px;line-height:1.7}
+.bar-wrap{background:#EEE;border-radius:20px;height:14px;overflow:hidden;margin-bottom:5px}
+.bar-fill{height:100%;border-radius:20px;background:linear-gradient(to right,var(--bl),var(--gr));transition:width 1s ease;width:0}
+.bar-label{font-size:12px;color:var(--mu);text-align:center;margin-bottom:20px}
+
+/* 問題 */
+.q-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.q-badge{background:var(--bl);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px}
+.q-num{font-size:12px;color:var(--mu)}
+.dots{display:flex;gap:5px;margin-bottom:16px}
+.dot{flex:1;height:5px;border-radius:3px;background:#E8E8E8;transition:background .3s}
+.dot.done{background:var(--gr)}
+.dot.cur{background:var(--or)}
+.q-text{font-size:19px;line-height:1.9;background:var(--bl2);border:2px solid #C0E4F8;border-radius:13px;padding:14px;margin-bottom:16px}
+.ch-btn{display:block;width:100%;background:#fff;border:2.5px solid #E0E0E0;border-radius:13px;padding:14px 16px;font-size:17px;font-family:inherit;cursor:pointer;text-align:left;color:var(--tx);margin-bottom:9px;transition:all .15s}
+.ch-btn:hover{border-color:var(--bl);background:var(--bl2)}
+.ch-btn.ok{border-color:var(--gr);background:var(--gr2);color:#1a7040}
+.ch-btn.ng{border-color:var(--re);background:#FDEAEA;color:#a02020}
+.ch-btn:disabled{cursor:default}
+
+/* 1問フィードバック */
+.ans-icon{font-size:60px;text-align:center;margin:4px 0;animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+.ans-head{font-size:22px;font-weight:900;text-align:center;margin-bottom:6px}
+.ans-msg{font-size:14px;color:var(--mu);text-align:center;margin-bottom:20px;line-height:1.7}
+
+/* 星評価 */
+.star-label{font-size:15px;font-weight:700;text-align:center;margin-bottom:6px}
+.star-sub{font-size:12px;color:var(--mu);text-align:center;margin-bottom:18px}
+.stars-wrap{display:flex;justify-content:center;gap:10px;margin-bottom:22px}
+.star{font-size:44px;cursor:pointer;transition:transform .15s;filter:grayscale(1) opacity(.3)}
+.star.lit{filter:none;transform:scale(1.12)}
+.star:hover{transform:scale(1.2)}
+.star-hint{font-size:13px;color:var(--mu);text-align:center;min-height:18px;margin-bottom:18px}
+
+/* 完了 */
+.final-score{font-size:56px;font-weight:900;text-align:center;margin:6px 0}
+.final-msg{font-size:14px;color:var(--mu);text-align:center;margin-bottom:22px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ① タイトル -->
+<div class="screen active" id="s0">
+  <div class="card">
+    <div class="logo">📖</div>
+    <div class="app-name">よんでみよう！</div>
+    <div class="app-sub">おんどく れんしゅう アプリ</div>
+    <div class="notice">🎤 Chrome と マイクが ひつようです</div>
+    <div style="text-align:center;margin-bottom:18px;min-height:28px"><span id="cnum" style="font-size:13px;color:#AAA">...</span></div>
+    <div style="text-align:center;margin-bottom:18px;min-height:28px"><span id="cnum" style="font-size:13px;color:#AAA">...</span></div>
+    <button class="btn btn-or" onclick="goList()">は じ め る ▶</button>
+  </div>
+</div>
+
+<!-- ② ストーリー一覧 -->
+<div class="screen" id="s1">
+  <div class="card">
+    <div class="list-head">おはなしを えらんでね</div>
+    <div id="story-list"></div>
+  </div>
+</div>
+
+<!-- ③ 文章確認 -->
+<div class="screen" id="s2">
+  <div class="card">
+    <div class="sec-label">おはなし</div>
+    <div class="p-title" id="pt"></div>
+    <div class="p-author" id="pa"></div>
+    <div class="p-box" id="pb"></div>
+    <div class="p-hint">↑ おおきな こえで よんでみてね！</div>
+    <button class="btn btn-or" onclick="goRec()">🎤 よみはじめる</button>
+    <button class="btn btn-gh btn-sm" onclick="show('s1')" style="margin-top:9px">← えらびなおす</button>
+  </div>
+</div>
+
+<!-- ④ 録音 -->
+<div class="screen" id="s3">
+  <div class="card">
+    <div class="rec-text" id="rt"></div>
+    <div class="mic-wrap">
+      <div class="mic-hint">🔴 きいています… よみおわったら おして！</div>
+      <button class="mic-btn" onclick="stopRec()">🎤</button>
+    </div>
+    <div class="heard" id="heard">（ここに よんだ ことばが でてくるよ）</div>
+  </div>
+</div>
+
+<!-- ⑤ 音読判定 -->
+<div class="screen" id="s4">
+  <div class="card">
+    <div class="big" id="ri"></div>
+    <div class="r-head" id="rh"></div>
+    <div class="r-msg" id="rm"></div>
+    <div class="bar-wrap"><div class="bar-fill" id="rb"></div></div>
+    <div class="bar-label" id="rl"></div>
+    <div id="rbtns"></div>
+  </div>
+</div>
+
+<!-- ⑥ 問題 -->
+<div class="screen" id="s5">
+  <div class="card">
+    <div class="q-top">
+      <div class="q-badge">もんだい</div>
+      <div class="q-num" id="qn"></div>
+    </div>
+    <div class="dots" id="qdots"></div>
+    <div class="q-text" id="qt"></div>
+    <div id="qch"></div>
+  </div>
+</div>
+
+<!-- ⑦ 1問結果 -->
+<div class="screen" id="s6">
+  <div class="card">
+    <div class="ans-icon" id="ai"></div>
+    <div class="ans-head" id="ah"></div>
+    <div class="ans-msg" id="am"></div>
+    <button class="btn btn-bl" id="nqb" onclick="nextQ()"></button>
+  </div>
+</div>
+
+<!-- ⑧ 星評価 -->
+<div class="screen" id="s7">
+  <div class="card">
+    <div class="big" id="fi"></div>
+    <div class="final-score" id="fs"></div>
+    <div class="r-head" id="fh"></div>
+    <div class="final-msg" id="fm"></div>
+    <div class="star-label">このアプリ、どうだった？</div>
+    <div class="star-sub">ほしを おして おしえてね</div>
+    <div class="stars-wrap" id="stars">
+      <span class="star" data-v="1">⭐</span>
+      <span class="star" data-v="2">⭐</span>
+      <span class="star" data-v="3">⭐</span>
+      <span class="star" data-v="4">⭐</span>
+      <span class="star" data-v="5">⭐</span>
+    </div>
+    <div class="star-hint" id="sh"></div>
+    <button class="btn btn-or" onclick="goList()">ほかの おはなしへ 📖</button>
+    <button class="btn btn-gh btn-sm" onclick="retry()" style="margin-top:9px">もういちど よむ 🔄</button>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+<script>
+const STORIES=[
+  {
+    icon:'🐇',title:'うさぎと かめ',author:'イソップ',tag:'むかしばなし',
+    text:'むかし、うさぎと かめが いました。\nうさぎは あしが はやくて、かめは のろのろと あるきます。\nある日、かめが うさぎに いいました。\n「かけっこを しませんか。」\nうさぎは わらいました。\n「かめに まけるわけが ない。」\nでも かけっこが はじまると、うさぎは とちゅうで ひるねを してしまいました。\nかめは ゆっくり ゆっくり あるきつづけました。\nそして かめが さきに ゴールに たどりつきました。',
+    qs:[
+      {q:'かめは うさぎに なにを いいましたか？',c:['かけっこを しよう','ごはんを たべよう','いっしょに ねよう'],a:0},
+      {q:'うさぎは とちゅうで なにを しましたか？',c:['みずを のんだ','ひるねを した','かめを おいかけた'],a:1},
+      {q:'きょうそうに かったのは だれですか？',c:['うさぎ','かめ','ふたりとも'],a:1},
+      {q:'かけっこを ていあんしたのは だれですか？',c:['うさぎ','かめ','ほかの どうぶつ'],a:1},
+      {q:'かめは どうやって あるきましたか？',c:['はやく はやく','ゆっくり ゆっくり','はしりながら'],a:1},
+      {q:'このおはなしで いちばん たいせつな ことは？',c:['はやく はしること','あきらめないこと','たくさん ねること'],a:1},
+    ]
+  },
+  {
+    icon:'🌱',title:'おおきな かぶ',author:'ロシアむかしばなし',tag:'むかしばなし',
+    text:'おじいさんが かぶを うえました。\nかぶは おおきく おおきく そだちました。\nおじいさんは かぶを ひっぱりました。\nでも かぶは ぬけません。\nおじいさんは おばあさんを よびました。\nおばあさんは おじいさんを、おじいさんは かぶを ひっぱりました。\nそれでも かぶは ぬけません。\nまごも きて、みんなで よいしょ よいしょ よいしょ！\nとうとう おおきな かぶが ぬけました。',
+    qs:[
+      {q:'おじいさんは なにを うえましたか？',c:['にんじん','かぶ','だいこん'],a:1},
+      {q:'おじいさんが はじめに よんだのは だれですか？',c:['まご','おばあさん','いぬ'],a:1},
+      {q:'かぶを ぬくとき なんと いいましたか？',c:['えいえいおー','よいしょよいしょ','がんばれがんばれ'],a:1},
+      {q:'みんなで ひっぱったとき かぶは どうなりましたか？',c:['ぬけた','ぬけなかった','われた'],a:0},
+      {q:'このおはなしで たいせつな ことは？',c:['つよい ひとが いること','みんなで きょうりょくすること','はやく うごくこと'],a:1},
+      {q:'かぶは どんなふうに そだちましたか？',c:['ちいさく','おおきく おおきく','ぜんぜん そだたなかった'],a:1},
+    ]
+  },
+  {
+    icon:'🐦',title:'ツバメの す',author:'オリジナル',tag:'しぜん',
+    text:'はるに なると ツバメが やってきます。\nツバメは ちいさな くちばしで どろを はこんで、\nこつこつと すを つくります。\nなんにちも なんにちも かけて、\nやっと きれいな まるい すが できあがりました。\nやがて たまごから ヒナが うまれました。\nおかあさんツバメは まいにち えさを はこびます。\nヒナたちは「ちゅん ちゅん」と なきます。\nそして あきに なると ツバメは みなみへ とんでいきます。',
+    qs:[
+      {q:'ツバメは いつ やってきますか？',c:['ふゆ','はる','なつ'],a:1},
+      {q:'ツバメは なにで すを つくりますか？',c:['えだ','どろ','はっぱ'],a:1},
+      {q:'すは どんな かたちですか？',c:['しかく','さんかく','まるい'],a:2},
+      {q:'ヒナは なにから うまれましたか？',c:['たまご','はな','き'],a:0},
+      {q:'あきに なると ツバメは どこへ いきますか？',c:['きたへ','みなみへ','ひがしへ'],a:1},
+      {q:'ヒナたちは どんな こえで なきますか？',c:['こけこっこ','ちゅんちゅん','わんわん'],a:1},
+    ]
+  },
+  {
+    icon:'🌧',title:'あめの日',author:'オリジナル',tag:'オリジナル',
+    text:'きょうは あめが ふっています。\nそらは くもで いっぱいです。\nたろうくんは まどから そとを みました。\n「かさを もって いかなきゃ。」\nたろうくんは あかい かさを もって がっこうへ でかけました。\nがっこうに つくと、ともだちの はなちゃんが ぬれていました。\n「かさ わすれちゃった」と はなちゃんは いいました。\nたろうくんは にっこり わらって かさを はなちゃんと いっしょに さしました。',
+    qs:[
+      {q:'きょうの てんきは どうですか？',c:['はれ','あめ','ゆき'],a:1},
+      {q:'たろうくんは なにいろの かさを もちましたか？',c:['あおいかさ','あかいかさ','きいろいかさ'],a:1},
+      {q:'たろうくんは どこへ でかけましたか？',c:['こうえん','がっこう','おみせ'],a:1},
+      {q:'はなちゃんは なぜ ぬれていましたか？',c:['あめで あそんだ','かさを わすれた','かさが こわれた'],a:1},
+      {q:'たろうくんは はなちゃんに どうしましたか？',c:['かさを あげた','いっしょに かさを さした','うちまで おくった'],a:1},
+      {q:'そらは どんな ようすですか？',c:['きれいに はれていた','くもで いっぱい','あかく なっていた'],a:1},
+    ]
+  },
+  {
+    icon:'🐱',title:'ねこの ミミ',author:'オリジナル',tag:'オリジナル',
+    text:'ねこの ミミは まいにち にわで あそびます。\nきょうは きれいな ちょうちょを みつけました。\nミミは そっと ちかよりました。\nでも ちょうちょは ふわりと とんで いって しまいました。\nミミは ぽかんと して そらを みあげました。\n「つぎは つかまえてみせる。」\nミミは つよく こころに きめました。',
+    qs:[
+      {q:'ミミは なにを みつけましたか？',c:['とり','ちょうちょ','ボール'],a:1},
+      {q:'ミミは どこで あそびますか？',c:['へや','にわ','こうえん'],a:1},
+      {q:'ちょうちょは どうしましたか？',c:['とんでいった','ミミと あそんだ','かくれた'],a:0},
+      {q:'ミミは ちょうちょに どうやって ちかよりましたか？',c:['そっと','はしって','さけんで'],a:0},
+      {q:'ミミは さいごに なにを こころに きめましたか？',c:['つぎは つかまえる','もう あそばない','おひるねする'],a:0},
+      {q:'ちょうちょは どんな とびかたを しましたか？',c:['すごく はやく','ふわりと','まっすぐに'],a:1},
+    ]
+  },
+  {
+    icon:'🐻',title:'くまと はちみつ',author:'オリジナル',tag:'オリジナル',
+    text:'くまの ぽんたは はちみつが だいすきです。\nある日、もりの おくに おおきな はちの すを みつけました。\n「あまい はちみつが いっぱいだ！」\nぽんたは てを のばしました。\nでも はちが ぶんぶん とんできました。\nぽんたは びっくりして にげました。\nはちみつは おあずけに なってしまいました。',
+    qs:[
+      {q:'ぽんたは なにが だいすきですか？',c:['きのみ','はちみつ','さかな'],a:1},
+      {q:'ぽんたは なにを みつけましたか？',c:['はなばたけ','はちの す','きのみ'],a:1},
+      {q:'ぽんたが てを のばしたとき なにが きましたか？',c:['とり','はち','かぜ'],a:1},
+      {q:'ぽんたは さいごに どうしましたか？',c:['はちみつを たべた','にげた','ねた'],a:1},
+      {q:'はちみつは どう なりましたか？',c:['たべられた','おあずけになった','こぼれた'],a:1},
+      {q:'ぽんたは はちみつを みて どう いいましたか？',c:['あまい はちみつが いっぱいだ','おいしそう','たべたい'],a:0},
+    ]
+  },
+  {
+    icon:'🌸',title:'はるの こうえん',author:'オリジナル',tag:'しぜん',
+    text:'はるに なると こうえんが いろとりどりに なります。\nさくらの はなが さいて、ピンクの はなびらが ふわふわ とびます。\nたんぽぽも きいろく さきました。\nこどもたちは こうえんに あつまって たのしく あそびました。\nちょうちょも とんできて はなの みつを すいます。\nはるの こうえんは みんなを えがおに します。',
+    qs:[
+      {q:'さくらの はなびらは どんな いろですか？',c:['しろ','ピンク','きいろ'],a:1},
+      {q:'たんぽぽは なにいろに さきましたか？',c:['あか','しろ','きいろ'],a:2},
+      {q:'こうえんに だれが あつまりましたか？',c:['こどもたち','おとなたち','どうぶつたち'],a:0},
+      {q:'ちょうちょは こうえんで なにを しましたか？',c:['あそんだ','みつを すった','ねた'],a:1},
+      {q:'はるの こうえんは みんなを どうしますか？',c:['えがおにする','ねむくする','つかれさせる'],a:0},
+      {q:'はるに なると こうえんは どうなりますか？',c:['さむくなる','いろとりどりになる','しずかになる'],a:1},
+    ]
+  },
+  {
+    icon:'🚂',title:'ちいさな きかんしゃ',author:'オリジナル',tag:'オリジナル',
+    text:'ちいさな きかんしゃの ポッポは まいにち やまを こえて はしります。\nある日、ふかい ゆきが ふって みちが ふさがりました。\n「こまったな。でも、がんばるぞ！」\nポッポは ゆっくり ゆっくり すすみました。\nゆきを かきわけて、かきわけて、とうとう むこうに たどりつきました。\nえきで まっていた ひとたちが はくしゅを おくりました。',
+    qs:[
+      {q:'ポッポは まいにち どこを こえて はしりますか？',c:['うみ','やま','まち'],a:1},
+      {q:'その日 なにが ふりましたか？',c:['あめ','ゆき','ひょう'],a:1},
+      {q:'ポッポは どんな きもちで すすみましたか？',c:['こわかった','がんばった','あきらめた'],a:1},
+      {q:'ポッポは どうやって すすみましたか？',c:['はやく はやく','ゆっくり ゆっくり','とまりながら'],a:1},
+      {q:'えきで まっていた ひとたちは どうしましたか？',c:['はくしゅを おくった','ないた','にげた'],a:0},
+      {q:'ポッポは さいごに どう なりましたか？',c:['もどった','むこうに たどりついた','とまった'],a:1},
+    ]
+  },
+  {
+    icon:'🐠',title:'うみの なかの おはなし',author:'オリジナル',tag:'しぜん',
+    text:'うみの なかは きれいな いろで あふれています。\nあおい うみに おれんじいろの さかなが およいでいます。\nむれを つくって、いっしょに およぐのが だいすきです。\nたこは いわの かげに かくれていました。\nくらげは ゆらゆら うえに のぼっていきます。\nうみの なかの いきものたちは みんな なかよし です。',
+    qs:[
+      {q:'うみの なかの さかなは なにいろですか？',c:['あおいろ','おれんじいろ','みどりいろ'],a:1},
+      {q:'たこは どこに かくれていましたか？',c:['すなの なか','いわの かげ','うみそうの なか'],a:1},
+      {q:'くらげは どんな うごきを しますか？',c:['はやく およぐ','ゆらゆら うえに のぼる','いわに はりつく'],a:1},
+      {q:'さかなたちは どうやって およぎますか？',c:['ひとりで','むれを つくって','いわに かくれて'],a:1},
+      {q:'うみの なかの いきものたちは どんな ようすですか？',c:['けんかしている','みんな なかよし','ひとりぼっち'],a:1},
+      {q:'うみの なかは どんな ようすですか？',c:['くらくて こわい','きれいな いろで いっぱい','なにも いない'],a:1},
+    ]
+  },
+  {
+    icon:'⭐',title:'よるの そら',author:'オリジナル',tag:'しぜん',
+    text:'よるに なると そらに ほしが でてきます。\nきらきら ひかって、とても きれいです。\nおつきさまも まるく ひかっています。\nこうたくんは まどから そらを みあげました。\n「あのほしは どのくらい とおいのかな。」\nおかあさんが やさしく いいました。\n「すごく すごく とおいところに あるんだよ。」\nこうたくんは まだまだ みていたくなりました。',
+    qs:[
+      {q:'よるに なると そらに なにが でてきますか？',c:['くも','ほし','かみなり'],a:1},
+      {q:'おつきさまは どんな ようすですか？',c:['くらい','まるく ひかっている','みえない'],a:1},
+      {q:'こうたくんは まどから なにを みましたか？',c:['にわ','そら','うみ'],a:1},
+      {q:'こうたくんは なにを しりたかったですか？',c:['ほしが いくつあるか','ほしが どのくらい とおいか','ほしが なぜ ひかるか'],a:1},
+      {q:'おかあさんは ほしが どこに あると いいましたか？',c:['ちかくに','すごく とおくに','もりの なかに'],a:1},
+      {q:'こうたくんは さいごに どんな きもちでしたか？',c:['まだ みていたかった','もう ねたかった','こわかった'],a:0},
+    ]
+  },
+];
+
+const Q_COUNT=3;
+let si=0,qp=[],qi=0,cc=0,recog=null,heard='',recording=false;
+
+function $(id){return document.getElementById(id)}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function shuffle(a){
+  const r=[...a];
+  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}
+  return r;
+}
+
+function goList(){
+  if(!('SpeechRecognition' in window)&&!('webkitSpeechRecognition' in window)){
+    alert('このブラウザは おんせい にゅうりょくに たいおうしていません。\nChrome を つかってください！');return;
+  }
+  const el=$('story-list');el.innerHTML='';
+  STORIES.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='story-item';
+    d.innerHTML=`<div class="si-icon">${s.icon}</div>
+      <div class="si-info"><div class="si-title">${s.title}</div><div class="si-author">${s.author}</div></div>
+      <div class="si-tag">${s.tag}</div>`;
+    d.onclick=()=>pick(i);
+    el.appendChild(d);
+  });
+  show('s1');
+}
+
+function pick(i){
+  si=i;const s=STORIES[i];
+  $('pt').textContent=s.icon+' '+s.title;
+  $('pa').textContent=s.author;
+  $('pb').textContent=s.text;
+  show('s2');
+}
+
+function goRec(){
+  heard='';$('heard').textContent='（ここに よんだ ことばが でてくるよ）';
+  $('rt').textContent=STORIES[si].text;
+  show('s3');startRec();
+}
+
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();recog.lang='ja-JP';recog.continuous=true;recog.interimResults=true;
+  recog.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal)heard+=t;else interim=t;
+    }
+    $('heard').textContent=(heard+interim).slice(-100)||'（きいています…）';
+  };
+  recog.onerror=ev=>{if(ev.error!=='no-speech')console.warn(ev.error)};
+  recog.onend=()=>{if(recording){try{recog.start()}catch(_){}}};
+  recording=true;recog.start();
+}
+
+function stopRec(){recording=false;if(recog)recog.stop();evaluate()}
+
+const KM={'降':'ふ','雨':'あめ','空':'そら','雲':'くも','学校':'がっこう','日':'ひ','行':'い','見':'み','出':'で','笑':'わら','昔':'むかし','帰':'かえ','毎日':'まいにち','庭':'にわ','蝶':'ちょう','今日':'きょう','春':'はる','秋':'あき','南':'みなみ','山':'やま','海':'うみ','夜':'よる','星':'ほし'};
+
+function norm(s){
+  let r=s.replace(/[、。！？「」\s　\n・]/g,'');
+  for(const[k,v]of Object.entries(KM))r=r.replaceAll(k,v);
+  return r;
+}
+
+function calcScore(rec,exp){
+  const e=norm(exp),r=norm(rec);
+  if(!e.length||!r.length)return 0;
+  let h2=0,t2=0,h1=0,t1=0;
+  for(let i=0;i<=e.length-2;i++){if(r.includes(e.slice(i,i+2)))h2++;t2++;}
+  for(let i=0;i<e.length;i++){if(r.includes(e[i]))h1++;t1++;}
+  return(t2?h2/t2:0)*.6+(t1?h1/t1:0)*.4;
+}
+
+function evaluate(){
+  const sc=calcScore(heard,STORIES[si].text);
+  const pct=Math.min(100,Math.round(sc*100));
+  const pass=sc>=0.38;
+  $('ri').textContent=pass?'🎉':'😊';
+  $('rh').textContent=pass?'じょうずに よめたよ！':'もういちど よんでみよう！';
+  $('rh').style.color=pass?'var(--gr)':'var(--or)';
+  $('rm').textContent=pass?'すごい！ つぎは もんだいだよ！':'ゆっくり はっきり よんでみてね。';
+  $('rbtns').innerHTML=pass
+    ?'<button class="btn btn-bl" onclick="startQ()">もんだいを はじめる ➡</button>'
+    :`<button class="btn btn-or" onclick="goRec()">🎤 もういちど</button>
+      <button class="btn btn-gh btn-sm" onclick="startQ()" style="margin-top:9px">もんだいも やってみる</button>`;
+  show('s4');
+  setTimeout(()=>{$('rb').style.width=pct+'%';$('rl').textContent=`よめた もじ：やく ${pct}%`},80);
+}
+
+function startQ(){
+  qp=shuffle(STORIES[si].qs).slice(0,Q_COUNT);
+  qi=0;cc=0;showQ();
+}
+
+function buildDots(){
+  const el=$('qdots');el.innerHTML='';
+  qp.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'+(i<qi?' done':i===qi?' cur':'');
+    el.appendChild(d);
+  });
+}
+
+function showQ(){
+  const q=qp[qi];
+  $('qn').textContent=`${qi+1} / ${Q_COUNT}もん`;
+  buildDots();
+  $('qt').textContent=q.q;
+  const w=$('qch');w.innerHTML='';
+  q.c.forEach((c,i)=>{
+    const b=document.createElement('button');
+    b.className='ch-btn';
+    b.textContent=['①','②','③'][i]+'　'+c;
+    b.onclick=()=>pick2(i);
+    w.appendChild(b);
+  });
+  show('s5');
+}
+
+function pick2(i){
+  const q=qp[qi];
+  document.querySelectorAll('.ch-btn').forEach((b,j)=>{
+    b.disabled=true;
+    if(j===q.a)b.classList.add('ok');
+    else if(j===i&&i!==q.a)b.classList.add('ng');
+  });
+  const ok=i===q.a;
+  if(ok)cc++;
+  setTimeout(()=>{
+    $('ai').textContent=ok?'🌟':'💪';
+    $('ah').textContent=ok?'せいかい！':'ざんねん…';
+    $('ah').style.color=ok?'var(--gr)':'var(--or)';
+    $('am').textContent=ok?'よく わかったね！':`こたえは「${q.c[q.a]}」だったよ。`;
+    $('nqb').textContent=qi>=Q_COUNT-1?'けっかを みる 🏆':'つぎの もんだい ➡';
+    show('s6');
+  },800);
+}
+
+function nextQ(){qi++;qi>=Q_COUNT?showFinal():showQ()}
+
+function showFinal(){
+  const tiers=[
+    ['😢','もう いちど！','おはなしを よんで かくにんしよう！'],
+    ['😊','おしい！','もう いっかいやってみよう！'],
+    ['👏','よく できました！','すごいね！'],
+    ['🏆','まんてん！！','かんぺきだよ！！'],
+  ];
+  const t=cc===Q_COUNT?3:cc>=Q_COUNT*.8?2:cc>=Q_COUNT*.5?1:0;
+  $('fi').textContent=tiers[t][0];
+  $('fs').textContent=`${cc} / ${Q_COUNT}`;
+  $('fs').style.color=t>=2?'var(--gr)':t===1?'var(--or)':'var(--mu)';
+  $('fh').textContent=tiers[t][1];
+  $('fm').textContent=tiers[t][2];
+
+  // 星setup
+  let starVal=0;
+  const msgs=['','うーん…','まあまあ','ふつう','よかった！','さいこう！'];
+  document.querySelectorAll('.star').forEach(s=>{
+    s.classList.remove('lit');
+    s.onmouseenter=()=>{
+      const v=+s.dataset.v;
+      document.querySelectorAll('.star').forEach(x=>x.classList.toggle('lit',+x.dataset.v<=v));
+      $('sh').textContent=msgs[v];
+    };
+    s.onmouseleave=()=>{
+      document.querySelectorAll('.star').forEach(x=>x.classList.toggle('lit',+x.dataset.v<=starVal));
+      $('sh').textContent=starVal?msgs[starVal]:'';
+    };
+    s.onclick=()=>{
+      starVal=+s.dataset.v;
+      document.querySelectorAll('.star').forEach(x=>x.classList.toggle('lit',+x.dataset.v<=starVal));
+      $('sh').textContent='ありがとう！ '+msgs[starVal];
+      console.log('star:',starVal,'story:',STORIES[si].title);
+    };
+  });
+  $('sh').textContent='';
+  show('s7');
+}
+
+function retry(){pick(si)}
+
+// カウンター
+(async()=>{
+  try{
+    const r=await fetch('https://api.countapi.xyz/hit/yondemiyo-app/visits');
+    const d=await r.json();
+    const n=d.value||0;
+    const el=document.getElementById('cnum');
+    if(el) el.textContent='🎮 これまで '+n.toLocaleString()+' かい チャレンジされたよ！';
+  }catch(e){
+    const el=document.getElementById('cnum');
+    if(el) el.textContent='';
+  }
+})();
+</script>
+</body>
+</html>
